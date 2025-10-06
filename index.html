@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" dir="1tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Passenger - Mysterious Shadows Await</title>
+    <meta name="description" content="Explore enigmatic products in the shadows. Dark Passenger - your guide to the night.">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+    
+
+    <header class="header" role="banner">
+        <nav class="nav" role="navigation" aria-label="Main navigation">
+            <div class="nav-brand">
+                <h1 class="logo">Dark Passenger</h1>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">products</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="cart.html" class="cart-link">
+                    Cart (<span id="cart-count">0</span>)
+                </a></li>
+                <li><a href="login.html">admin</a></li>
+            </ul>
+            <div class="contact-info">
+                <a href="tel:+201090607630" aria-label="Call us">+20 109 060 7630</a>
+                <span>Egypt</span>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        <section class="hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Welcome to the Shadows</h2>
+                <p class="hero-subtitle">Discover enigmatic treasures that lurk in the dark. Your journey begins here.</p>
+                <a href="products.html" class="cta-button">Explore the Void</a>
+            </div>
+        </section>
+
+        <section class="featured-section" id="featured">
+            <h2 class="section-title">Featured Shadows</h2>
+            <div id="product-grid" class="product-grid" role="list" aria-label="Featured 3 products">
+                <!-- main.js will render 3 featured products here -->
+            </div>
+        </section>
+
+
+    <!-- Product Modal -->
+    <dialog id="product-modal" class="modal" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <button id="modal-close" class="modal-close" aria-label="Close modal">×</button>
+            <div id="modal-body"></div>
+        </div>
+    </dialog>
+
+    <footer class="footer" role="contentinfo">
+        <p>&copy; 2023 Dark Passenger. All shadows reserved.</p>
+        <div class="footer-contact">
+            <a href="tel:+201090607630">+20 109 060 7630</a> | Egypt | <a href="mailto:moaazemadwork@gmail.com">moaazemadwork@gmail.com</a>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

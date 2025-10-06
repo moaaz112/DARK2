@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Dark Passenger Admin</title>
+    <link rel="stylesheet" href="style.css"> <!-- مشترك (header, footer إذا موجود) -->
+    <link rel="stylesheet" href="admin-specific.css"> <!-- الخاص بالـ admin (الـ CSS أدناه) -->
+</head>
+<body>
+    <!-- Top Nav -->
+    <nav class="admin-top-nav">
+        <ul>
+            <li><a href="admin-dashboard.html" class="active">📊 Dashboard</a></li>
+            <li><a href="admin-products.html">🛍️ Products</a></li>
+            <li><a href="admin-orders.html">📦 Orders</a></li>
+            <li><a href="admin-users.html">👥 Users</a></li>
+            <li><a href="admin-settings.html">⚙️ Settings</a></li>
+            <li style="margin-left: auto;"><a href="index.html">View Site</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="admin-main" style="margin-top: 70px; padding: 2rem;">
+        <!-- Hero -->
+        <section class="admin-page-hero">
+            <h1>Welcome to Admin Dashboard</h1>
+            <p>Manage your shadowy empire – Overview of key metrics and quick actions</p>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="admin-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🛍️</div>
+                    <h3 id="total-products">0</h3>
+                    <p>Total Products</p>
+                    <button class="admin-btn admin-btn-primary" onclick="window.location.href='admin-products.html'" style="margin-top: 1rem; padding: 8px 16px; font-size: 0.9rem;">Manage</button>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <h3 id="pending-orders">0</h3>
+                    <p>Pending Orders</p>
+                    <button class="admin-btn admin-btn-success" onclick="window.location.href='admin-orders.html'" style="margin-top: 1rem; padding: 8px 16px; font-size: 0.9rem;">View All</button>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <h3 id="total-users">0</h3>
+                    <p>Total Users</p>
+                    <button class="admin-btn admin-btn-warning" onclick="window.location.href='admin-users.html'" style="margin-top: 1rem; padding: 8px 16px; font-size: 0.9rem;">Manage</button>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <h3 id="monthly-revenue">$0.00</h3>
+                    <p>Monthly Revenue</p>
+                    <button class="admin-btn admin-btn-primary" onclick="window.location.href='admin-orders.html'" style="margin-top: 1rem; padding: 8px 16px; font-size: 0.9rem;">Reports</button>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="admin-btn admin-btn-primary" onclick="window.location.href='admin-products.html'">Add New Product</button>
+                <button class="admin-btn admin-btn-success" onclick="window.location.href='admin-orders.html'">Process Orders</button>
+                <button class="admin-btn admin-btn-warning" onclick="window.location.href='admin-users.html'">User  Analytics</button>
+                <button class="admin-btn admin-btn-danger" onclick="window.location.href='admin-settings.html'">Site Settings</button>
+            </div>
+
+            <!-- Recent Activity (Optional - Mock) -->
+            <div class="admin-section">
+                <h3 class="section-title" style="font-size: 1.5rem; text-align: left;">Recent Activity</h3>
+                <ul style="list-style: none; padding: 0; background: rgba(31,41,55,0.8); border-radius: 12px; padding: 1rem;">
+                    <li style="padding: 0.5rem; border-bottom: 1px solid #1f2937; color: #94a3b8;">New order #3 placed (10/03/2024)</li>
+                    <li style="padding: 0.5rem; border-bottom: 1px solid #1f2937; color: #94a3b8;">Product 'Shadow Hoodie' updated (10/02/2024)</li>
+                    <li style="padding: 0.5rem; color: #94a3b8;">User  'Ahmed Ali' registered (10/01/2024)</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Dark Passenger Admin. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Dashboard JS - Load Stats from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load data
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Update Stats
+            document.getElementById('total-products').textContent = products.length;
+            document.getElementById('pending-orders').textContent = orders.filter(o => o.status === 'pending').length;
+            document.getElementById('total-users').textContent = users.length;
+            const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('monthly-revenue').textContent = '$' + totalRevenue.toFixed(2);
+
+            // Logout Function
+            window.logout = function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    localStorage.removeItem('admin-session'); // Optional: clear session
+                    window.location.href = 'index.html';
+                }
+            };
+
+            console.log('Dashboard loaded:', { products: products.length, orders: orders.length, users: users.length });
+        });
+    </script>
+</body>
+</html>

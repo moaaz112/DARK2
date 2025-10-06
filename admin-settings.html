@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Dark Passenger Admin</title>
+    <link rel="stylesheet" href="style.css"> <!-- مشترك -->
+    <link rel="stylesheet" href="admin-specific.css"> <!-- المحسن -->
+</head>
+<body>
+    <!-- Top Nav -->
+    <nav class="admin-top-nav">
+        <ul>
+            <li><a href="admin-dashboard.html">📊 Dashboard</a></li>
+            <li><a href="admin-products.html">🛍️ Products</a></li>
+            <li><a href="admin-orders.html">📦 Orders</a></li>
+            <li><a href="admin-users.html">👥 Users</a></li>
+            <li><a href="admin-settings.html" class="active">⚙️ Settings</a></li>
+            <li style="margin-left: auto;"><a href="index.html">View Site</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="admin-main" style="margin-top: 70px; padding: 2rem;">
+        <!-- Hero -->
+        <section class="admin-page-hero">
+            <h1>Site Settings</h1>
+            <p>Customize your store's information and preferences – Changes apply site-wide</p>
+        </section>
+
+        <section class="admin-section">
+            <form class="admin-form" id="settings-form">
+                <div class="form-row">
+                    <div>
+                        <label for="site-name">Site Name</label>
+                        <input type="text" id="site-name" placeholder="e.g., Dark Passenger" required>
+                    </div>
+                    <div>
+                        <label for="site-email">Contact Email</label>
+                        <input type="email" id="site-email" placeholder="e.g., info@darkpassenger.com" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label for="site-phone">Phone Number</label>
+                        <input type="tel" id="site-phone" placeholder="e.g., +20 109 060 7630">
+                    </div>
+                    <div>
+                        <label for="site-currency">Default Currency</label>
+                        <select id="site-currency">
+                            <option value="USD">USD ($)</option>
+                            <option value="EGP">EGP (E£)</option>
+                            <option value="EUR">EUR (€)</option>
+                        </select>
+                    </div>
+                </div>
+                <label for="site-desc">Site Description</label>
+                <textarea id="site-desc" placeholder="A brief description of your store..." rows="4" required></textarea>
+                <label for="site-logo">Site Logo (Optional)</label>
+                <input type="file" id="site-logo" accept="image/*">
+                <img id="logo-preview" class="product-image-preview" alt="Logo Preview" style="display: none; max-width: 150px; margin-top: 0.5rem;">
+                <div class="admin-btn-group">
+                    <button type="submit" class="admin-btn admin-btn-success">Save Settings</button>
+                    <button type="reset" class="admin-btn admin-btn-warning" onclick="resetSettings()">Reset to Default</button>
+                </div>
+            </form>
+
+            <!-- Success Alert (Hidden Initially) -->
+            <div id="success-alert" style="display: none; background: rgba(16,185,129,0.2); color: #10b981; padding: 1rem; border-radius: 8px; margin-top: 1rem; text-align: center; border: 1px solid #10b981;">
+                Settings saved successfully! Refresh the site to see changes.
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Dark Passenger Admin. All rights reserved.</p>
+    </footer>
+    <script>
+        // Settings JS - Load/Save to localStorage (مصحح كامل)
+        document.addEventListener('DOMContentLoaded'), function() {
+            // Load existing settings
+            const settings = JSON.parse(localStorage.getItem('site-settings')) || {
+                name: 'Dark Passenger',
+                email: 'info@darkpassenger.com',
+                phone: '+20 109 060 7630',
+                currency: 'USD',
+                desc: 'Embrace the shadows with Dark Passenger – Your gateway to the night.',
+                logo: '' // URL or base64
+            };
+
+            document.getElementById('site-name').value = settings.name;
+            document.getElementById('site-email').value = settings.email;
+            document.getElementById('site-phone').value = settings.phone;
+            document.getElementById('site-currency').value = settings.currency;
+            document.getElementById('site-desc').value = settings.desc;
+
+            // Logo Preview
+            if (settings.logo) {
+                document.getElementById('logo-preview').src = settings.logo;
+                document.getElementById('logo-preview').style.display = 'block';
+            }
+
+            document.getElementById('site-logo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const logoPreview = document.getElementById('logo-preview');
+                logoPreview.src = ev.target.result;
+                logoPreview.style.display = 'block';
+
+                // Update settings object immediately
+                settings.logo = ev.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    // Save settings button
+    document.getElementById('save-settings').addEventListener('click', function() {
+        settings.name = document.getElementById('site-name').value;
+        settings.email = document.getElementById('site-email').value;
+        settings.phone = document.getElementById('site-phone').value;
+        settings.currency = document.getElementById('site-currency').value;
+        settings.desc = document.getElementById('site-desc').value;
+
+        localStorage.setItem('site-settings', JSON.stringify(settings));
+        alert('Settings saved!');
+    });
+
+};

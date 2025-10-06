@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - Dark Passenger Admin</title>
+    <link rel="stylesheet" href="style.css"> <!-- مشترك (header, footer إذا موجود) -->
+    <link rel="stylesheet" href="admin-specific.css"> <!-- الخاص بالـ admin (من الرد السابق) -->
+</head>
+<body>
+    <!-- Top Nav -->
+    <nav class="admin-top-nav">
+        <ul>
+            <li><a href="admin-dashboard.html">📊 Dashboard</a></li>
+            <li><a href="admin-products.html">🛍️ Products</a></li>
+            <li><a href="admin-orders.html" class="active">📦 Orders</a></li>
+            <li><a href="admin-users.html">👥 Users</a></li>
+            <li><a href="admin-settings.html">⚙️ Settings</a></li>
+            <li style="margin-left: auto;"><a href="index.html">View Site</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="admin-main" style="margin-top: 70px; padding: 2rem;">
+        <!-- Hero -->
+        <section class="admin-page-hero">
+            <h1>Orders Management</h1>
+            <p>View, update, and manage customer orders – Track shipments and status</p>
+        </section>
+
+        <section class="admin-section">
+            <!-- Quick Stats -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <h3 class="section-title" style="margin: 0; font-size: 1.5rem;">All Orders (Total: <span id="total-orders-count">0</span>)</h3>
+                <div>
+                    <select id="status-filter" onchange="filterOrders()" style="background: rgba(11,15,18,0.8); color: #e6eef8; padding: 8px; border: 1px solid #1f2937; border-radius: 4px;">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-tbody">
+                    <!-- JS will populate -->
+                </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div id="empty-orders" class="empty-state" style="display: none;">
+                <p>No orders found. <a href="admin-dashboard.html">Go to Dashboard</a></p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Order Details Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('order-modal')">&times;</span>
+            <h3 id="order-modal-title">Order Details</h3>
+            <div id="order-details-content">
+                <!-- JS will fill: Customer info, items, total, status -->
+            </div>
+            <div class="admin-btn-group">
+                <button type="button" class="admin-btn admin-btn-success" onclick="updateOrderStatus()">Update Status</button>
+                <button type="button" class="admin-btn admin-btn-danger" onclick="deleteOrderFromModal()">Delete Order</button>
+                <button type="button" class="admin-btn admin-btn-primary" onclick="closeModal('order-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Update Modal (Simple Dropdown) -->
+    <div id="status-update-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeStatusModal()">&times;</span>
+            <h3>Update Order Status</h3>
+            <p>Order ID: <span id="updating-order-id"></span></p>
+            <select id="new-status" style="width: 100%; padding: 10px; margin: 1rem 0; background: rgba(11,15,18,0.8); color: #e6eef8; border: 1px solid #1f2937; border-radius: 4px;">
+                <option value="pending">Pending</option>
+                <option value="shipped">Shipped</option>
+                <option value="completed">Completed</option>
+            </select>
+            <div class="admin-btn-group">
+                <button type="button" class="admin-btn admin-btn-success" onclick="saveStatusUpdate()">Save</button>
+                <button type="button" class="admin-btn admin-btn-danger" onclick="closeStatusModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Dark Passenger Admin. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Orders JS - CRUD with localStorage
+        let orders = JSON.parse(localStorage.getItem('orders')) || [
+            { 
+                id: 1, 
+                customer: 'Ahmed Ali', 
+                email: 'ahmed@example.com', 
+                total: 119.98, 
+                status: 'pending', 
+                date: '2024-10-01', 
+                items: [{ name: 'Shadow Hoodie', qty: 2, price: 59.99 }], 
+                address: 'Cairo, Egypt', 
+                payment: 'Credit Card' 
+            },
+            { 
+                id: 2, 
+                customer: 'Sara Ahmed', 
+                email: 'sara@example.com', 
+                total: 89.97, 
+                status: 'shipped', 
+                date: '2024-10-02', 
+                items: [{ name: 'Void Pendant', qty: 3, price: 29.99 }], 
+                address: 'Alexandria, Egypt', 
+                payment: 'PayPal' 
+            },
+            { 
+                id: 3, 
+                customer: 'Mohamed Hassan', 
+                email: 'mohamed@example.com', 
+                total: 200.00, 
+                status: 'completed', 
+                date: '2024-10-03', 
+                items: [{ name: 'Shadow Hoodie', qty: 1, price: 59.99 }, { name: 'Void Pendant', qty: 4, price: 29.99 }], 
+                address: 'Giza, Egypt', 
+                payment: 'Cash on Delivery' 
+            }
+        ];
+        let currentOrderId = null;
+
+        function renderOrders(filteredOrders = orders) {
+            const tbody = document.getElementById('orders-tbody');
+            const totalCountEl = document.getElementById('total-orders-count');
+            const emptyEl = document.getElementById('empty-orders');
+
+            tbody.innerHTML = '';
+            totalCountEl.textContent = filteredOrders.length;
+
+            if (filteredOrders.length === 0) {
+                emptyEl.style.display = 'block';
+                return;
+            } else {
+                emptyEl.style.display = 'none';
+            }
+
+            filteredOrders.forEach(order => {
+                const row = document.createElement('tr');
+                const statusClass = `status-${order.status}`;
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer} <br><small>${order.email}</small></td>
+                    <td>$${order.total.toFixed(2)}</td>
+                    <td><span class="order-status ${statusClass}">${order.status.toUpperCase()}</span></td>
+                    <td>${order.date}</td>
+                    <td>
+                        <button class="admin-btn admin-btn-primary" onclick="viewOrderDetails(${order.id})" style="padding: 5px 10px; font-size: 0.85rem;">View</button>
+                        <button class="admin-btn admin-btn-warning" onclick="updateOrderStatusFromTable(${order.id})" style="padding: 5px 10px; font-size: 0.85rem;">Update Status</button>
+                        <button class="admin-btn admin-btn-danger" onclick="deleteOrder(${order.id})" style="padding: 5px 10px; font-size: 0.85rem;">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            localStorage.setItem('orders', JSON.stringify(orders));
+        }
+
+        window.filterOrders = function() {
+            const filter = document.getElementById('status-filter').value;
+            const filtered = filter ? orders.filter(o => o.status === filter) : orders;
+            renderOrders(filtered);
+        };
+
+        window.viewOrderDetails = function(id) {
+            currentOrderId = id;
+            const order = orders.find(o => o.id === id);
+            if (!order) return alert('Order not found!');
+
+            document.getElementById('order-modal-title').textContent = `Order #${order.id} Details`;
+            const content = document.getElementById('order-details-content');
+            content.innerHTML = `
+                <div style="background: rgba(31,41,55,0.5); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h4>Customer Info</h4>
+                    <p><strong>Name:</strong> ${order.customer}</p>
+                    <p><strong>Email:</strong> ${order.email}</p>
+                    <p><strong>Address:</strong> ${order.address}</p>
+                    <p><strong>Payment:</strong> ${order.payment}</p>
+                </div>
+                <div style="background: rgba(31,41,55,0.5); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h4>Items</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        ${order.items.map(item => `<li style="padding: 0.5rem; border-bottom: 1px solid #1f2937;"><strong>${item.name}</strong> - Qty: ${item.qty} - $${(item.price * item.qty).toFixed(2)}</li>`).join('')}
+                    </ul>
+                </div>
+                <div style="text-align: right; font-size: 1.2rem; color: #d946ef; font-weight: bold;">
+                    <p>Total: $${order.total.toFixed(2)}</p>
+                    <p>Status: <span class="order-status status-${order.status}">${order.status.toUpperCase()}</span></p>
+                </div>
+            `;
+            document.getElementById('order-modal').style.display = 'block';
+        };
+
+        window.updateOrderStatusFromTable = function(id) {
+            currentOrderId = id;
+            document.getElementById('updating-order-id').textContent = id;
+            document.getElementById('new-status').value = orders.find(o => o.id === id)?.status || 'pending';
+            document.getElementById('status-update-modal').style.display = 'block';
+        };
+
+        window.updateOrderStatus = function() {
+            // From details modal, open status update
+            updateOrderStatusFromTable(currentOrderId);
+            closeModal('order-modal');
+        };
+
+        window.saveStatusUpdate = function() {
+            const newStatus = document.getElementById('new-status').value;
+            const order = orders.find(o => o.id === currentOrderId);
+            if (order) {
+                order.status = newStatus;
+                alert(`Status updated to ${newStatus}!`);
+                closeStatusModal();
+                renderOrders(); // Refresh table
+            }
+        };
+
+        window.closeStatusModal = function() {
+            document.getElementById('status-update-modal').style.display = 'none';
+        };
+
+        window.deleteOrder = function(id) {
+            if (confirm(`Delete order #${id}? This cannot be undone.`)) {
+                orders = orders.filter(o => o.id !== id);
+                renderOrders();
+                alert('Order deleted!');
+                if (currentOrderId === id) closeModal('order-modal');
+            }
+        };
+
+        window.deleteOrderFromModal = function() {
+            deleteOrder(currentOrderId);
+        };
+
+        window.showModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        };
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        };
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrders();
+            window.logout = function() {
+                if (confirm('Logout?')) window.location.href = 'index.html';
+            };
+        });
+    </script>
+</body>
+</html>

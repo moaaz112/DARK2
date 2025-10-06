@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Dark Passenger</title>
+    <style>
+        /* CSS كامل inline – Dark Theme بسيط ومتجاوب */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #0a0e14 0%, #1a1f2e 100%); 
+            color: #e6eef8; 
+            line-height: 1.6; 
+        }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .dashboard-section { 
+            background: rgba(31,41,55,0.8); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            margin-bottom: 2rem; 
+            border: 1px solid #1f2937; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+        }
+        h1, h2 { color: #d946ef; margin-bottom: 1rem; }
+        h2 { font-size: 1.8rem; }
+        .stats { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .stat-card { background: rgba(124, 58, 237, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid #7c3aed; text-align: center; flex: 1; min-width: 150px; }
+        .stat-card .value { font-size: 2rem; color: #d946ef; font-weight: bold; }
+        .orders-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; background: rgba(15,23,42,0.5); }
+        .orders-table th, .orders-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #1f2937; color: #e6eef8; }
+        .orders-table th { background: rgba(124, 58, 237, 0.2); color: #d946ef; font-weight: bold; }
+        .orders-table .total { text-align: right; font-weight: bold; color: #10b981; }
+        .orders-table .status { padding: 0.5rem; border-radius: 4px; font-weight: bold; }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-shipped { background: #dbeafe; color: #1e40af; }
+        .status-delivered { background: #d1fae5; color: #059669; }
+        .actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+        .actions button, .actions select { padding: 0.5rem; border-radius: 4px; cursor: pointer; border: none; color: #e6eef8; font-size: 0.9rem; }
+        .btn-status { background: #7c3aed; }
+        .btn-delete { background: #ef4444; }
+        .btn-details { background: #10b981; }
+        .btn:hover { opacity: 0.8; }
+        .empty-orders { text-align: center; padding: 3rem; color: #94a3b8; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: rgba(31,41,55,0.95); margin: 5% auto; padding: 2rem; border-radius: 12px; width: 80%; max-width: 600px; border: 1px solid #1f2937; }
+        .close { color: #ef4444; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .items-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .items-table th, .items-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #1f2937; }
+        .items-table th { background: rgba(124, 58, 237, 0.2); color: #d946ef; }
+        header { background: rgba(31,41,55,0.95); padding: 1rem; text-align: center; border-bottom: 1px solid #1f2937; margin-bottom: 2rem; }
+        header a { color: #94a3b8; text-decoration: none; }
+        footer { text-align: center; padding: 1rem; color: #94a3b8; background: rgba(31,41,55,0.5); margin-top: 2rem; }
+        @media (max-width: 768px) { 
+            .dashboard-container { padding: 1rem; }
+            .stats { flex-direction: column; }
+            .orders-table { font-size: 0.9rem; overflow-x: auto; display: block; white-space: nowrap; }
+            .orders-table th, .orders-table td { padding: 0.75rem; min-width: 100px; }
+            .actions { flex-direction: column; }
+            .modal-content { width: 95%; margin: 10% auto; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dark Passenger Admin Dashboard</h1>
+        <a href="index.html">← Back to Site</a>
+    </header>
+
+    <main class="dashboard-container">
+        <section class="dashboard-section">
+            <h2>Dashboard Overview</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="value" id="total-orders">0</div>
+                    <div>Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="total-revenue">$0.00</div>
+                    <div>Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="pending-orders">0</div>
+                    <div>Pending Orders</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>Orders Management</h2>
+            <div id="orders-list">
+                <!-- JS will populate -->
+            </div>
+            <div id="empty-orders" class="empty-orders" style="display: none;">
+                <p>No orders yet. Place some test orders via checkout.html.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Order Details -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-title">Order Details</h3>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Dark Passenger Admin. Manage Orders.</p>
+    </footer>
+
+    <script>
+        // JS كامل inline – يدير الطلبات من localStorage 'orders'
+        console.log('Admin Dashboard loaded...');
+
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+        function renderStats() {
+            const totalOrders = orders.length;
+            const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+            const pendingOrders = orders.filter(order => order.status === 'pending').length;
+
+            document.getElementById('total-orders').textContent = totalOrders;
+            document.getElementById('total-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
+            document.getElementById('pending-orders').textContent = pendingOrders;
+        }
+
+        function renderOrders() {
+            const listEl = document.getElementById('orders-list');
+            const emptyEl = document.getElementById('empty-orders');
+
+            if (orders.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.style.display = 'block';
+                return;
+            }
+
+            emptyEl.style.display = 'none';
+
+            let ordersHtml = '';
+            orders.forEach((order, index) => {
+                const statusClass = `status-${order.status}`;
+                const itemsCount = order.items ? order.items.length : 0;
+                ordersHtml += `
+                    <tr onclick="showDetails(${index})" style="cursor: pointer;">
+                        <td>${order.id}</td>
+                        <td>${order.customer || 'N/A'}</td>
+                        <td>${order.email || 'N/A'}</td>
+                        <td class="total">$${order.total ? order.total.toFixed(2) : '0.00'}</td>
+                        <td><span class="status ${statusClass}">${order.status || 'pending'}</span></td>
+                        <td>${order.date || 'N/A'}</td>
+                        <td>${itemsCount} items</td>
+                        <td>
+                            <div class="actions">
+                                <select class="btn-status" onchange="updateStatus(${index}, this.value)">
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                </select>
+                                <button class="btn-details" onclick="event.stopPropagation(); showDetails(${index})">Details</button>
+                                <button class="btn-delete" onclick="event.stopPropagation(); deleteOrder(${index})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            listEl.innerHTML = `
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${ordersHtml}
+                    </tbody>
+                </table>
+            `;
+            console.log('Orders rendered:', orders.length);
+        }
+
+        window.updateStatus = function(index, newStatus) {
+            if (orders[index]) {
+                orders[index].status = newStatus;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                renderOrders();
+                renderStats();
+                alert(`Status updated to: ${newStatus}`);
+            }
+        };
+
+        window.deleteOrder = function(index) {
+            if (confirm('Delete this order?')) {
+                orders.splice(index, 1);
+                localStorage.setItem('orders', JSON.stringify(orders));
+                renderOrders();
+                renderStats();
+            }
+        };
+
+        window.showDetails = function(index) {
+            const order = orders[index];
+            if (!order) return;
+
+            let itemsHtml = '';
+            if (order.items && order.items.length > 0) {
+                itemsHtml = `
+                    <table class="items-table">
+                        <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+                        <tbody>
+                            ${order.items.map(item => `
+                                <tr>
+                                    <td>${item.name || 'N/A'}</td>
+                                    <td>${item.qty || 1}</td>
+                                    <td>$${ (item.price || 0).toFixed(2) }</td>
+                                    <td>$${ ((item.qty || 1) * (item.price || 0)).toFixed(2) }</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            document.getElementById('modal-title').textContent = `Order #${order.id}`;
+            document.getElementById('modal-body').innerHTML = `
+                <p><strong>Customer:</strong> ${order.customer || 'N/A'}</p>
+                <p><strong>Email:</strong> ${order.email || 'N/A'}</p>
+                <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+                <p><strong>Payment:</strong> ${order.payment || 'N/A'}</p>
+                <p><strong>Status:</strong> <span class="status status-${order.status}">${order.status || 'pending'}</span></p>
+                <p><strong>Date:</strong> ${order.date || 'N/A'}</p>
+                <p><strong>Total:</strong> $${order.total ? order.total.toFixed(2) : '0.00'}</p>
+                <h4>Items:</h4>
+                ${itemsHtml || '<p>No items.</p>'}
+            `;
+            document.getElementById('order-modal').style.display = 'block';
+        };
+
+        // Modal close
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('order-modal').style.display = 'none';
+        };
+        window.onclick = function(event) {
+            const modal = document.getElementById('order-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        // Load on page ready
+        document.addEventListener('DOMContentLoaded', function() {
+            renderStats();
+            renderOrders();
+        });
+    </script>
+</body>
+</html>

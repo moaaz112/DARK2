@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - All Items - Dark Passenger</title>
+    <meta name="description" content="Browse all 5 mysterious products/items in the shadows. Dark Passenger full catalog.">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <header class="header" role="banner">
+        <nav class="nav" role="navigation" aria-label="Main navigation">
+            <div class="nav-brand">
+                <h1 class="logo">Dark Passenger</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">products</a></li> <!-- يشير لنفس الصفحة أو يمكن تغييره -->
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="cart.html" class="cart-link">
+                    Cart (<span id="cart-count">0</span>)
+                </a></li>
+                <li><a href="login.html">Admin</a></li>
+            </ul>
+            <div class="contact-info">
+                <a href="tel:+201090607630" aria-label="Call us">+20 109 060 7630</a>
+                <span>Egypt</span>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        <section class="shop-hero">
+            <div class="hero-content">
+                <h2 class="hero-title">All Products in the Shadows</h2>
+                <p class="hero-subtitle">Discover our full catalog of 5 enigmatic items. Click cards for details and add to cart.</p>
+            </div>
+        </section>
+
+        <section class="products-section" id="products">
+            <h2 class="section-title">Product Catalog</h2>
+            <div id="product-grid" class="product-grid" role="list" aria-label="All 5 products">
+                <!-- main.js will render ALL 5 products here automatically -->
+            </div>
+            <button id="back-to-top" class="back-to-top" aria-label="Back to top">↑ Top</button>
+        </section>
+
+
+    <!-- Product Modal (للتفاصيل والإضافة للسلة) -->
+    <dialog id="product-modal" class="modal" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <button id="modal-close" class="modal-close" aria-label="Close modal">×</button>
+            <div id="modal-body"></div>
+        </div>
+    </dialog>
+
+    <footer class="footer" role="contentinfo">
+        <p>&copy; 2023 Dark Passenger. All shadows reserved.</p>
+        <div class="footer-contact">
+            <a href="tel:+201090607630">+20 109 060 7630</a> | Egypt | <a href="mailto:moaazemadwork@gmail.com">moaazemadwork@gmail.com</a>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // Additional JS for Products Page (Auto-scroll & Back to Top)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto-scroll to products section on load (من main.js أيضاً، بس هنا للضمان)
+            const productsSection = document.getElementById('products') || document.querySelector('.products-section');
+            if (productsSection) {
+                setTimeout(() => {
+                    productsSection.scrollIntoView({ behavior: 'smooth' });
+                }, 200);
+            }
+
+            // Back to Top Button
+            const backToTop = document.getElementById('back-to-top');
+            if (backToTop) {
+                window.addEventListener('scroll', () => {
+                    backToTop.style.display = window.scrollY > 300 ? 'block' : 'none';
+                });
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            // Update Cart UI (من main.js)
+            if (window.DarkPassenger && window.DarkPassenger.updateCartUI) {
+                window.DarkPassenger.updateCartUI();
+            }
+
+            // Listen for cart updates (للتحديث التلقائي)
+            window.addEventListener('cartUpdated', () => {
+                if (window.DarkPassenger && window.DarkPassenger.updateCartUI) {
+                    window.DarkPassenger.updateCartUI();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Dark Passenger</title>
+    <meta name="description" content="Contact Dark Passenger for inquiries about our shadowy products.">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <header class="header" role="banner">
+        <nav class="nav" role="navigation" aria-label="Main navigation">
+            <div class="nav-brand">
+                <h1 class="logo">Dark Passenger</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">products</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="cart.html" class="cart-link">
+                    Cart (<span id="cart-count">0</span>)
+                </a></li>
+                <li><a href="login.html">login</a></li>
+            </ul>
+            <div class="contact-info">
+                <a href="tel:+201090607630" aria-label="Call us">+20 109 060 7630</a>
+                <span>Egypt</span>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        <section class="contact-hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Contact the Shadows</h2>
+                <p class="hero-subtitle">Reach out from the void. We'll whisper back.</p>
+            </div>
+        </section>
+
+        <section class="contact-section">
+            <div class="contact-info-box">
+                <h3>Get in Touch</h3>
+                <p><strong>Phone:</strong> <a href="tel:+201090607630">+20 109 060 7630</a></p>
+                <p><strong>Email:</strong> <a href="mailto:moaazemadwork@gmail.com">moaazemadwork@gmail.com</a></p>
+                <p><strong>Location:</strong> Egypt</p>
+                <p><strong>Hours:</strong> Shadows never sleep.</p>
+            </div>
+
+            <form class="contact-form" aria-label="Contact form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required aria-required="true"></textarea>
+                </div>
+                <button type="submit" class="cta-button">Send into the Void</button>
+            </form>
+        </section>
+
+       
+
+    <footer class="footer" role="contentinfo">
+        <p>&copy; 2023 Dark Passenger. All shadows reserved.</p>
+        <div class="footer-contact">
+            <a href="tel:+201090607630">+20 109 060 7630</a> | Egypt | <a href="mailto:moaazemadwork@gmail.com">moaazemadwork@gmail.com</a>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        // Contact Form Handler (mock submit)
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('.contact-form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    alert('Message sent into the shadows! (Mock - in real app, send via email API)');
+                    form.reset();
+                });
+            }
+            if (window.DarkPassenger) window.DarkPassenger.updateCartUI();
+        });
+    </script>
+</body>
+</html>

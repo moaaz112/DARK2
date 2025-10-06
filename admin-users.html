@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Dark Passenger Admin</title>
+    <link rel="stylesheet" href="style.css"> <!-- مشترك -->
+    <link rel="stylesheet" href="admin-specific.css"> <!-- المحسن -->
+</head>
+<body>
+    <!-- Top Nav -->
+    <nav class="admin-top-nav">
+        <ul>
+            <li><a href="admin-dashboard.html">📊 Dashboard</a></li>
+            <li><a href="admin-products.html">🛍️ Products</a></li>
+            <li><a href="admin-orders.html">📦 Orders</a></li>
+            <li><a href="admin-users.html" class="active">👥 Users</a></li>
+            <li><a href="admin-settings.html">⚙️ Settings</a></li>
+            <li style="margin-left: auto;"><a href="index.html">View Site</a></li>
+            <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="admin-main" style="margin-top: 70px; padding: 2rem;">
+        <!-- Hero -->
+        <section class="admin-page-hero">
+            <h1>Users Management</h1>
+            <p>View, edit roles, and manage user accounts – Control access and permissions</p>
+        </section>
+
+        <section class="admin-section">
+            <!-- Quick Stats -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <h3 class="section-title" style="margin: 0; font-size: 1.5rem;">All Users (Total: <span id="total-users-count">0</span>)</h3>
+                <div>
+                    <select id="role-filter" onchange="filterUsers()" style="background: rgba(11,15,18,0.8); color: #e6eef8; padding: 8px; border: 1px solid #1f2937; border-radius: 4px;">
+                        <option value="">All Roles</option>
+                        <option value="admin">Admins</option>
+                        <option value="user">Users</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-tbody">
+                    <!-- JS will populate -->
+                </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div id="empty-users" class="empty-state" style="display: none;">
+                <p>No users found. <a href="admin-dashboard.html">Go to Dashboard</a></p>
+            </div>
+        </section>
+    </main>
+
+    <!-- User Edit Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('user-modal')">&times;</span>
+            <h3 id="user-modal-title">Edit User</h3>
+            <form id="user-form">
+                <input type="hidden" id="edit-user-id">
+                <label for="user-name">Name</label>
+                <input type="text" id="user-name" required>
+                <label for="user-email">Email</label>
+                <input type="email" id="user-email" required>
+                <label for="user-role">Role</label>
+                <select id="user-role" required>
+                    <option value="user">User </option>
+                    <option value="admin">Admin</option>
+                </select>
+                <div class="admin-btn-group">
+                    <button type="submit" class="admin-btn admin-btn-success">Save Changes</button>
+                    <button type="button" class="admin-btn admin-btn-danger" onclick="deleteUserFromModal()">Delete User</button>
+                    <button type="button" class="admin-btn admin-btn-primary" onclick="closeModal('user-modal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Dark Passenger Admin. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Users JS - CRUD with localStorage (مصحح)
+        let users = JSON.parse(localStorage.getItem('users')) || [
+            { id: 1, name: 'Admin User', email: 'admin@darkpassenger.com', role: 'admin', joined: '2024-01-01' },
+            { id: 2, name: 'Ahmed Ali', email: 'ahmed@example.com', role: 'user', joined: '2024-09-15' },
+            { id: 3, name: 'Sara Ahmed', email: 'sara@example.com', role: 'user', joined: '2024-09-20' },
+            { id: 4, name: 'Mohamed Hassan', email: 'mohamed@example.com', role: 'admin', joined: '2024-09-25' },
+            { id: 5, name: 'Fatma Said', email: 'fatma@example.com', role: 'user', joined: '2024-10-01' }
+        ];
+        let currentUserId = null; // مصحح: no space
+
+        function renderUsers(filteredUsers = users) {
+            const tbody = document.getElementById('users-tbody');
+            const totalCountEl = document.getElementById('total-users-count');
+            const emptyEl = document.getElementById('empty-users');
+
+            tbody.innerHTML = '';
+            totalCountEl.textContent = filteredUsers.length;
+
+            if (filteredUsers.length === 0) {
+                emptyEl.style.display = 'block';
+                return;
+            } else {
+                emptyEl.style.display = 'none';
+            }
+
+            filteredUsers.forEach(user => {
+                const row = document.createElement('tr');
+                const roleBadge = user.role === 'admin' ? 'Admin' : 'User ';
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td><span style="padding: 4px 8px; border-radius: 4px; font-weight: bold; ${user.role === 'admin' ? 'background: rgba(59,130,246,0.2); color: #3b82f6;' : 'background: rgba(16,185,129,0.2); color: #10b981;'}">${roleBadge}</span></td>
+                    <td>${user.joined}</td>
+                    <td>
+                        <button class="admin-btn admin-btn-warning" onclick="editUser (${user.id})" style="padding: 5px 10px; font-size: 0.85rem;">Edit</button>
+                        <button class="admin-btn admin-btn-danger" onclick="deleteUser (${user.id})" style="padding: 5px 10px; font-size: 0.85rem;">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        window.filterUsers = function() {
+            const filter = document.getElementById('role-filter').value;
+            const filtered = filter ? users.filter(u => u.role === filter) : users;
+            renderUsers(filtered);
+        };
+
+        window.editUser  = function(id) { // مصحح: no space
+            currentUserId = id;
+            const user = users.find(u => u.id === id);
+            if (!user) return alert('User  not found!');
+
+            document.getElementById('edit-user-id').value = id;
+            document.getElementById('user-name').value = user.name;
+            document.getElementById('user-email').value = user.email;
+            document.getElementById('user-role').value = user.role;
+            document.getElementById('user-modal-title').textContent = `Edit User: ${user.name}`;
+            showModal('user-modal');
+        };
+
+        window.deleteUser  = function(id) { // مصحح: no space
+            if (confirm(`Delete user #${id}? This cannot be undone.`)) {
+                users = users.filter(u => u.id !== id);
+                renderUsers();
+                alert('User  deleted!');
+                if (currentUserId === id) closeModal('user-modal');
+            }
+        };
+
+        window.deleteUserFromModal = function() { // مصحح: no space
+            deleteUser (currentUserId);
+        };
+
+        // Form Submit (Edit Only)
+        document.getElementById('user-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('edit-user-id').value);
+            const name = document.getElementById('user-name').value;
+            const email = document.getElementById('user-email').value;
+            const role = document.getElementById('user-role').value;
+
+            const user = users.find(u => u.id === id);
+            if (user) {
+                user.name = name;
+                user.email = email;
+                user.role = role;
+                alert('User  updated!');
+                closeModal('user-modal');
+                renderUsers();
+            } else {
+                alert('Error: User not found!');
+            }
+        });
+
+        window.showModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        };
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.getElementById('user-form').reset();
+            document.getElementById('edit-user-id').value = '';
+        };
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderUsers();
+            window.logout = function() {
+                if (confirm('Logout?')) window.location.href = 'index.html';
+            };
+        });
+    </script>
+</body>
+</html>

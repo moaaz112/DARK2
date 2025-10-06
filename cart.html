@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - Dark Passenger</title>
+    <style>
+        /* CSS كامل inline – Dark Theme بسيط ومتجاوب */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #0a0e14 0%, #1a1f2e 100%); 
+            color: #e6eef8; 
+            line-height: 1.6; 
+        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .header { 
+            background: rgba(31,41,55,0.95); 
+            padding: 1rem; 
+            text-align: center; 
+            border-bottom: 1px solid #1f2937; 
+            margin-bottom: 2rem; 
+        }
+        .header h1 { color: #d946ef; margin: 0; }
+        .header a { color: #94a3b8; text-decoration: none; }
+        .cart-section { 
+            background: rgba(31,41,55,0.8); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            border: 1px solid #1f2937; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+        }
+        h2 { color: #d946ef; margin-bottom: 1rem; font-size: 1.8rem; }
+        .cart-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 1rem; 
+            background: rgba(15,23,42,0.5); 
+            overflow-x: auto; 
+            display: block; 
+            white-space: nowrap; 
+        }
+        .cart-table thead { display: table; width: 100%; table-layout: fixed; }
+        .cart-table tbody { display: table; width: 100%; table-layout: fixed; }
+        .cart-table th, .cart-table td { 
+            padding: 1rem; 
+            text-align: left; 
+            border-bottom: 1px solid #1f2937; 
+            color: #e6eef8; 
+            display: table-cell; 
+        }
+        .cart-table th { 
+            background: rgba(124, 58, 237, 0.2); 
+            color: #d946ef; 
+            font-weight: bold; 
+            position: sticky; top: 0; 
+        }
+        .cart-table .price, .cart-table .subtotal { 
+            text-align: right; 
+            font-weight: bold; 
+            color: #10b981; 
+        }
+        .qty-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+        .qty-btn { 
+            padding: 0.5rem 0.75rem; 
+            background: #7c3aed; 
+            color: #e6eef8; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1rem; 
+            min-width: 30px; 
+            transition: background 0.3s; 
+        }
+        .qty-btn:hover { background: #6d28d9; }
+        .qty-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        .remove-btn { 
+            padding: 0.5rem 1rem; 
+            background: #ef4444; 
+            color: #e6eef8; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin-left: 0.5rem; 
+            transition: background 0.3s; 
+        }
+        .remove-btn:hover { background: #dc2626; }
+        .summary { 
+            background: rgba(16,185,129,0.1); 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            margin-top: 2rem; 
+            border: 1px solid #10b981; 
+        }
+        .summary-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 0.75rem; 
+            font-size: 1.1rem; 
+        }
+        .total-row { 
+            font-size: 1.5rem; 
+            color: #d946ef; 
+            border-top: 2px solid #1f2937; 
+            padding-top: 1rem; 
+            font-weight: bold; 
+        }
+        .empty-state { 
+            text-align: center; 
+            padding: 3rem; 
+            color: #94a3b8; 
+        }
+        .empty-state a { color: #7c3aed; text-decoration: none; font-weight: bold; }
+        .btn-group { 
+            display: flex; 
+            justify-content: flex-end; 
+            gap: 1rem; 
+            margin-top: 1rem; 
+            flex-wrap: wrap; 
+        }
+        .btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-decoration: none; 
+            display: inline-block; 
+            transition: background 0.3s; 
+        }
+        .btn-primary { background: #7c3aed; color: #e6eef8; }
+        .btn-primary:hover { background: #6d28d9; }
+        .btn-danger { background: #ef4444; color: #e6eef8; }
+        .btn-danger:hover { background: #dc2626; }
+        .footer { 
+            text-align: center; 
+            padding: 1rem; 
+            color: #94a3b8; 
+            background: rgba(31,41,55,0.5); 
+            margin-top: 2rem; 
+        }
+        @media (max-width: 768px) { 
+            .container { padding: 1rem; }
+            .cart-table { font-size: 0.9rem; }
+            .cart-table th, .cart-table td { padding: 0.75rem; min-width: 80px; }
+            .btn-group { flex-direction: column; width: 100%; }
+            .btn { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dark Passenger Cart</h1>
+        <a href="index.html">← Continue Shopping</a>
+    </div>
+
+    <div class="container">
+        <section class="cart-section">
+            <h2>Your Cart</h2>
+            
+            <div id="cart-content">
+                <!-- JS will render table or empty state -->
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Dark Passenger. Review your items before checkout.</p>
+    </footer>
+
+    <script>
+        // JS كامل inline – Load/Render Cart + Update/Remove/Clear
+        console.log('Cart page loaded...');
+
+        let cart = [];
+
+        // Load cart from localStorage with error handling
+        function loadCart() {
+            try {
+                const stored = localStorage.getItem('cart');
+                console.log('Raw localStorage:', stored);
+                if (stored && stored !== 'null') {
+                    cart = JSON.parse(stored);
+                    if (!Array.isArray(cart)) {
+                        console.warn('Invalid cart format, resetting...');
+                        cart = [];
+                    }
+                } else {
+                    cart = [];
+                }
+                console.log('Loaded cart:', cart, 'Items:', cart.length);
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                cart = [];
+                localStorage.removeItem('cart');
+            }
+        }
+
+        // Calculate subtotal
+        function calculateSubtotal() {
+            return cart.reduce((total, item) => {
+                const qty = item.qty || 1;
+                const price = parseFloat(item.price) || 0;
+                return total + (qty * price);
+            }, 0);
+        }
+
+        // Render cart table or empty state
+        function renderCart() {
+            const contentEl = document.getElementById('cart-content');
+            const subtotal = calculateSubtotal();
+
+            if (cart.length === 0) {
+                contentEl.innerHTML = `
+                    <div class="empty-state">
+                        <p>Your cart is empty. <a href="index.html">Start shopping</a> or <a href="products.html">browse products</a>.</p>
+                    </div>
+                `;
+                console.log('Cart empty – showing empty state');
+                return;
+            }
+
+            let tableRows = '';
+            cart.forEach((item, index) => {
+                const qty = item.qty || 1;
+                const price = parseFloat(item.price) || 0;
+                const itemSubtotal = qty * price;
+                console.log(`Rendering item ${index}: ${item.name}, qty=${qty}, subtotal=${itemSubtotal}`);
+
+                tableRows += `
+                    <tr>
+                        <td>${item.name || 'Unknown Item'}</td>
+                        <td>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="updateQty(${index}, -1)" ${qty <= 1 ? 'disabled' : ''}>-</button>
+                                <span style="min-width: 20px; text-align: center;">${qty}</span>
+                                <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+                            </div>
+                        </td>
+                        <td class="price">$${price.toFixed(2)}</td>
+                        <td class="subtotal">$${itemSubtotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            contentEl.innerHTML = `
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+
+                <div class="summary">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">$${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Total (before tax & shipping):</span>
+                        <span id="total">$${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div class="btn-group">
+                        <a href="checkout.html?subtotal=${subtotal.toFixed(2)}" class="btn btn-primary">Proceed to Checkout</a>
+                        <button class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
+                    </div>
+                </div>
+            `;
+            console.log('Cart rendered – Subtotal:', subtotal);
+        }
+
+        // Update quantity
+        window.updateQty = function(index, delta) {
+            if (cart[index]) {
+                const newQty = Math.max(1, (cart[index].qty || 1) + delta);
+                cart[index].qty = newQty;
+                saveCart();
+                renderCart();
+                console.log(`Qty updated for ${cart[index].name}: ${newQty}`);
+            }
+        };
+
+        // Remove item
+        window.removeItem = function(index) {
+            if (confirm(`Remove ${cart[index].name} from cart?`)) {
+                cart.splice(index, 1);
+                saveCart();
+                renderCart();
+                console.log('Item removed');
+            }
+        };
+
+        // Clear entire cart
+        window.clearCart = function() {
+            if (confirm('Clear all items from cart? This cannot be undone.')) {
+                cart = [];
+                localStorage.removeItem('cart');
+                renderCart();
+                console.log('Cart cleared');
+            }
+        };
+
+        // Save to localStorage
+        function saveCart() {
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+                console.log('Cart saved:', cart);
+            } catch (error) {
+                console.error('Error saving cart:', error);
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCart();
+            renderCart();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Dark Passenger</title>
+    <style>
+        /* CSS كامل inline – Dark Theme بسيط ومتجاوب */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #0a0e14 0%, #1a1f2e 100%); 
+            color: #e6eef8; 
+            line-height: 1.6; 
+        }
+        .checkout-container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        .checkout-section { 
+            background: rgba(31,41,55,0.8); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            margin-bottom: 2rem; 
+            border: 1px solid #1f2937; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+        }
+        h1, h2 { color: #d946ef; margin-bottom: 1rem; }
+        h2 { font-size: 1.8rem; }
+        .order-items-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 1rem; 
+            background: rgba(15,23,42,0.5); 
+        }
+        .order-items-table th, .order-items-table td { 
+            padding: 1rem; 
+            text-align: left; 
+            border-bottom: 1px solid #1f2937; 
+            color: #e6eef8; 
+        }
+        .order-items-table th { 
+            background: rgba(124, 58, 237, 0.2); 
+            color: #d946ef; 
+            font-weight: bold; 
+        }
+        .order-items-table .price, .order-items-table .subtotal { 
+            text-align: right; 
+            font-weight: bold; 
+            color: #10b981; 
+        }
+        .order-summary { 
+            background: rgba(16,185,129,0.1); 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            margin-top: 1rem; 
+            border: 1px solid #10b981; 
+        }
+        .order-summary div { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 0.75rem; 
+            color: #e6eef8; 
+            font-size: 1.1rem; 
+        }
+        .order-summary .total { 
+            font-size: 1.5rem; 
+            color: #d946ef; 
+            border-top: 2px solid #1f2937; 
+            padding-top: 1rem; 
+            font-weight: bold; 
+        }
+        .checkout-form { display: grid; gap: 1.5rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .checkout-form input, .checkout-form select, .checkout-form textarea { 
+            background: rgba(11,15,18,0.8); 
+            color: #e6eef8; 
+            padding: 12px; 
+            border: 1px solid #1f2937; 
+            border-radius: 6px; 
+            width: 100%; 
+        }
+        .checkout-form label { display: block; margin-bottom: 0.5rem; color: #94a3b8; }
+        .cart-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+        .cart-actions button { 
+            padding: 0.5rem 0.75rem; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            border: none; 
+            color: #e6eef8; 
+            font-weight: bold; 
+            font-size: 0.9rem; 
+        }
+        .btn-update { background: #7c3aed; }
+        .btn-remove { background: #ef4444; }
+        .btn-update:hover, .btn-remove:hover { opacity: 0.8; }
+        .empty-cart { text-align: center; padding: 3rem; color: #94a3b8; }
+        .empty-cart a { color: #7c3aed; text-decoration: none; }
+        .admin-btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin: 0 0.5rem; 
+            text-decoration: none; 
+            display: inline-block; 
+        }
+        .admin-btn-success { background: #10b981; color: #e6eef8; }
+        .admin-btn-warning { background: #f59e0b; color: #e6eef8; }
+        .admin-btn-group { display: flex; justify-content: flex-end; gap: 1rem; }
+        header { 
+            background: rgba(31,41,55,0.95); 
+            padding: 1rem; 
+            text-align: center; 
+            border-bottom: 1px solid #1f2937; 
+        }
+        header h1 { color: #d946ef; margin: 0; }
+        header a { color: #94a3b8; text-decoration: none; }
+        footer { 
+            text-align: center; 
+            padding: 1rem; 
+            color: #94a3b8; 
+            background: rgba(31,41,55,0.5); 
+            margin-top: 2rem; 
+        }
+        @media (max-width: 768px) { 
+            .checkout-container { padding: 1rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .order-items-table { font-size: 0.9rem; overflow-x: auto; display: block; white-space: nowrap; }
+            .order-items-table th, .order-items-table td { padding: 0.75rem; min-width: 80px; }
+            .admin-btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dark Passenger Checkout</h1>
+        <a href="index.html">← Back to Shop</a>
+    </header>
+
+    <main class="checkout-container">
+        <section class="checkout-section">
+            <h2>Order Summary</h2>
+            <div id="order-summary">
+                <!-- JS will populate items table + summary -->
+            </div>
+            <div id="empty-cart-msg" class="empty-cart" style="display: none;">
+                <p>Your cart is empty. <a href="products.html">Add products</a> first.</p>
+            </div>
+        </section>
+
+        <section class="checkout-section" id="checkout-form-section" style="display: none;">
+            <h2>Billing & Shipping Info</h2>
+            <form class="checkout-form" id="checkout-form">
+                <div class="form-row">
+                    <div>
+                        <label for="customer-name">Full Name *</label>
+                        <input type="text" id="customer-name" required>
+                    </div>
+                    <div>
+                        <label for="customer-email">Email *</label>
+                        <input type="email" id="customer-email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label for="customer-address">Address *</label>
+                        <textarea id="customer-address" rows="3" required placeholder="Enter your full address..."></textarea>
+                    </div>
+                    <div>
+                        <label for="customer-phone">Phone (Optional)</label>
+                        <input type="tel" id="customer-phone" placeholder="+20 ...">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label for="payment-method">Payment Method *</label>
+                        <select id="payment-method" required>
+                            <option value="">Select...</option>
+                            <option value="credit-card">Credit Card</option>
+                            <option value="paypal">PayPal</option>
+                            <option value="cash">Cash on Delivery</option>
+                        </select>
+                    </div>
+                    <div style="align-self: end; text-align: right;">
+                        <label style="display: block;">Total Amount: <span id="total-amount-display" style="color: #d946ef; font-weight: bold; font-size: 1.2rem;">$0.00</span></label>
+                    </div>
+                </div>
+                <div class="admin-btn-group">
+                    <button type="button" class="admin-btn admin-btn-warning" onclick="window.location.href='cart.html'">Back to Cart</button>
+                    <button type="submit" class="admin-btn admin-btn-success">Place Order</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Dark Passenger. Secure Checkout.</p>
+    </footer>
+
+    <script>
+        // JS كامل inline – يقرأ من localStorage 'cart' ويحسب كل حاجة
+        console.log('Checkout loaded...');
+
+        let cart = [];
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+        // Load cart from localStorage
+        try {
+            const storedCart = localStorage.getItem('cart');
+            if (storedCart) {
+                cart = JSON.parse(storedCart);
+                if (!Array.isArray(cart)) cart = [];
+            }
+            console.log('Cart loaded:', cart);
+        } catch (e) {
+            console.error('Cart load error:', e);
+            cart = [];
+        }
+
+        function renderOrderSummary() {
+            const summaryEl = document.getElementById('order-summary');
+            const emptyEl = document.getElementById('empty-cart-msg');
+            const formSection = document.getElementById('checkout-form-section');
+
+            if (cart.length === 0) {
+                summaryEl.innerHTML = '<p>Loading cart...</p>';
+                emptyEl.style.display = 'block';
+                formSection.style.display = 'none';
+                return;
+            }
+
+            emptyEl.style.display = 'none';
+            formSection.style.display = 'block';
+
+            let subtotal = 0;
+            let itemsHtml = '';
+            cart.forEach((item, index) => {
+                const qty = item.qty || 1;
+                const price = item.price || 0;
+                const itemSubtotal = qty * price;
+                subtotal += itemSubtotal;
+                itemsHtml += `
+                    <tr>
+                        <td>${item.name || 'Unknown Item'}</td>
+                        <td>
+                            <div class="cart-actions">
+                                <button type="button" class="btn-update" onclick="updateQty(${index}, -1)">-</button>
+                                <span>${qty}</span>
+                                <button type="button" class="btn-update" onclick="updateQty(${index}, 1)">+</button>
+                                <button type="button" class="btn-remove" onclick="removeItem(${index})">Remove</button>
+                            </div>
+                        </td>
+                        <td class="price">$${price.toFixed(2)}</td>
+                        <td class="subtotal">$${itemSubtotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            const tax = subtotal * 0.10; // 10% tax
+            const shipping = 5.00; // Fixed shipping
+            const grandTotal = subtotal + tax + shipping;
+
+            document.getElementById('total-amount-display').textContent = `$${grandTotal.toFixed(2)}`;
+
+            summaryEl.innerHTML = `
+                <table class="order-items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                <div class="order-summary">
+                    <h4>Order Summary</h4>
+                    <div><span>Subtotal:</span> <span>$${subtotal.toFixed(2)}</span></div>
+                    <div><span>Shipping:</span> <span>$${shipping.toFixed(2)}</span></div>
+                    <div class="total"><span>Grand Total:</span> <span>$${grandTotal.toFixed(2)}</span></div>
+                </div>
+            `;
+            console.log('Summary rendered – Total:', grandTotal);
+        }
+
+        // Update quantity
+        window.updateQty = function(index, change) {
+            if (cart[index]) {
+                cart[index].qty = Math.max(1, (cart[index].qty || 1) + change);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderOrderSummary();
+            }
+        };
+
+        // Remove item
+        window.removeItem = function(index) {
+            if (confirm('Remove this item?')) {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderOrderSummary();
+            }
+        };
+
+        // Form submit – Place order
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Placing order...');
+
+            const name = document.getElementById('customer-name').value.trim();
+            const email = document.getElementById('customer-email').value.trim();
+            const address = document.getElementById('customer-address').value.trim();
+            const phone = document.getElementById('customer-phone').value.trim();
+            const payment = document.getElementById('payment-method').value;
+
+            if (!name || !email || !address || !payment || cart.length === 0) {
+                alert('Please fill all required fields and add items to cart!');
+                return;
+            }
+
+            // Calculate final total
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += (item.qty || 1) * (item.price || 0);
+            });
+            const tax = subtotal * 0.10;
+            const shipping = 5.00;
+            const total = subtotal + tax + shipping;
+
+            // Create order
+            const newOrder = {
+                id: Date.now(),
+                customer: name,
+                email: email,
+                address: address,
+                phone: phone,
+                payment: payment,
+                items: [...cart],
+                subtotal: subtotal,
+                tax: tax,
+                shipping: shipping,
+                total: total,
+                status: 'pending',
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            orders.push(newOrder);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            // Clear cart
+            localStorage.removeItem('cart');
+
+            alert(`Order placed successfully! ID: ${newOrder.id}\nTotal: $${total.toFixed(2)}`);
+            window.location.href = 'index.html'; // Redirect to home
+        });
+
+        // Load on page ready
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrderSummary();
+        });
+    </script>
+</body>
+</html>
